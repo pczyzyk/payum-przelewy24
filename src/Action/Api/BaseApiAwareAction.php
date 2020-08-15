@@ -2,14 +2,14 @@
 
 declare(strict_types = 1);
 
-namespace Nova\Payum\P24\Action\Api;
+namespace pczyzyk\P24\Action\Api;
 
 use Payum\Core\Action\ActionInterface;
 use Payum\Core\ApiAwareInterface;
 use Payum\Core\ApiAwareTrait;
 use Payum\Core\GatewayAwareInterface;
 use Payum\Core\GatewayAwareTrait;
-use Nova\Payum\P24\Api;
+use pczyzyk\P24\Api;
 
 abstract class BaseApiAwareAction implements ActionInterface, GatewayAwareInterface, ApiAwareInterface
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Nova\Payum\P24\Tests;
+namespace pczyzyk\P24\Tests;
 
 use Mockery;
 

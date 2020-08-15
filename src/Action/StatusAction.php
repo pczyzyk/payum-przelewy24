@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Nova\Payum\P24\Action;
+namespace pczyzyk\P24\Action;
 
-use Nova\Payum\P24\Api;
+use pczyzyk\P24\Api;
 use Payum\Core\Action\ActionInterface;
 use Payum\Core\Request\GetStatusInterface;
 use Payum\Core\Bridge\Spl\ArrayObject;

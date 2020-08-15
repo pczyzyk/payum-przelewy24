@@ -2,15 +2,15 @@
 
 declare(strict_types = 1);
 
-namespace Nova\Payum\P24;
+namespace pczyzyk\P24;
 
-use Nova\Payum\P24\Action\AuthorizeAction;
-use Nova\Payum\P24\Action\CancelAction;
-use Nova\Payum\P24\Action\ConvertPaymentAction;
-use Nova\Payum\P24\Action\CaptureAction;
-use Nova\Payum\P24\Action\NotifyAction;
-use Nova\Payum\P24\Action\RefundAction;
-use Nova\Payum\P24\Action\StatusAction;
+use pczyzyk\P24\Action\AuthorizeAction;
+use pczyzyk\P24\Action\CancelAction;
+use pczyzyk\P24\Action\ConvertPaymentAction;
+use pczyzyk\P24\Action\CaptureAction;
+use pczyzyk\P24\Action\NotifyAction;
+use pczyzyk\P24\Action\RefundAction;
+use pczyzyk\P24\Action\StatusAction;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\GatewayFactory;
 

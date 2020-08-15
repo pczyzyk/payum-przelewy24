@@ -2,12 +2,12 @@
 
 declare(strict_types = 1);
 
-namespace Nova\Payum\P24;
+namespace pczyzyk\P24;
 
 use ArrayAccess;
 use GuzzleHttp\Psr7\Response;
 use Http\Message\MessageFactory;
-use Nova\Payum\P24\Exception\GatewayException;
+use pczyzyk\P24\Exception\GatewayException;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\Http\HttpException;
 use Payum\Core\HttpClientInterface;

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Nova\Payum\P24\Exception;
+namespace pczyzyk\P24\Exception;
 
 use Payum\Core\Exception\RuntimeException;
 use Psr\Http\Message\ResponseInterface;

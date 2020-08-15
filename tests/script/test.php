@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-//namespace Nova\Payum\P24\Tests\Script;
+//namespace pczyzyk\P24\Tests\Script;
 
-use Nova\Payum\P24\P24GatewayFactory;
+use pczyzyk\P24\P24GatewayFactory;
 use Payum\Core\PayumBuilder;
 use Payum\Core\Payum;
 use Payum\Core\Model\Payment;

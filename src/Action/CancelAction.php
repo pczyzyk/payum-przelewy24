@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Nova\Payum\P24\Action;
+namespace pczyzyk\P24\Action;
 
 use Payum\Core\Action\ActionInterface;
 use Payum\Core\Bridge\Spl\ArrayObject;
