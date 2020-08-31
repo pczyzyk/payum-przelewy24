@@ -53,35 +53,9 @@ class NotifyAction implements ActionInterface, GatewayAwareInterface, ApiAwareIn
         /** @var ArrayObject $details */
         $details = ArrayObject::ensureArrayObject($httpRequest->request);
 
-        //dump($details);
         $res = $api->trnVerify($details);
 
-        //$status = new GetHumanStatus($request->getToken());
-        //$status->setModel($request->getFirstModel());
-        //$status->setModel($request->getModel());
-        //$this->gateway->execute($status);
-
         $model['status'] = API::STATUS_VERIFIED;
-
-
-        //$this->tokenStorage->delete($request->getToken());
-
-        /*$this->gateway->execute($status = new GetHumanStatus($payment));
-        if ($status->isNew()) {
-            $this->gateway->execute($convert = new Convert($payment, 'array', $request->getToken()));
-
-            $payment->setDetails($convert->getResult());
-        }*/
-
-        //dump($res);
-
-        //$token = $this->paymentService->getHttpRequestVerifier()->verify($httpRequest);
-        //$gateway = $this->paymentService->getGateway($token->getGatewayName());
-        //$gateway->execute($status = new GetHumanStatus($token));
-        //$details = $status->getFirstModel();
-
-        //dump($details);
-        //$this->paymentService->getHttpRequestVerifier()->invalidate($token);
     }
 
     /**

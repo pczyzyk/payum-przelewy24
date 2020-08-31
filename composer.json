@@ -13,7 +13,8 @@
     "require": {
         "php": ">=7.0",
         "payum/core": "^1.6",
-        "php-http/guzzle6-adapter": "^2.0"
+        "php-http/guzzle6-adapter": "^2.0",
+        "mashape/unirest-php": "^3.0"
     },
     "require-dev": {
         "payum/core": "^1.6",

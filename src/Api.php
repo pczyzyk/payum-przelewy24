@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace pczyzyk\P24;
 
@@ -11,20 +11,19 @@ use pczyzyk\P24\Exception\GatewayException;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\Http\HttpException;
 use Payum\Core\HttpClientInterface;
+use Unirest;
 
-class Api
-{
+class Api {
+
     public const STATUS_NEW = 'new';
     public const STATUS_PENDING = 'pending';
     public const STATUS_RECEIVED = 'received';
     public const STATUS_REFUNDED = 'refunded';
     public const STATUS_VERIFIED = 'verified';
-
     public const CURRENCY_PLN = 'PLN';
     public const CURRENCY_EUR = 'EUR';
     public const CURRENCY_GBP = 'GBP';
     public const CURRENCY_CZK = 'CZK';
-
     private const METHOD_REGISTER = 'trnRegister';
     private const METHOD_VERIFY = 'trnVerify';
     private const METHOD_TEST = 'testConnection';
@@ -34,7 +33,6 @@ class Api
 
     /** defaulut api url */
     private const DEFAULT_URL = 'https://secure.przelewy24.pl/';
-
     private const SANDBOX_URL = 'https://sandbox.przelewy24.pl/';
 
     /**
@@ -54,7 +52,7 @@ class Api
         'p24_merchant_id' => null,
         'p24_pos_id' => null,
         'CRC' => null,
-        'redirect' => true, // Set true to redirect to Przelewy24 after transaction registration
+        'redirect' => false, // Set true to redirect to Przelewy24 after transaction registration
         'sandbox' => true,
     ];
 
@@ -65,8 +63,7 @@ class Api
      *
      * @throws \Payum\Core\Exception\InvalidArgumentException if an option is invalid
      */
-    public function __construct(array $options, HttpClientInterface $client, MessageFactory $messageFactory)
-    {
+    public function __construct(array $options, HttpClientInterface $client, MessageFactory $messageFactory) {
         $options = ArrayObject::ensureArrayObject($options);
         $options->defaults($this->options);
         $options->validateNotEmpty([
@@ -80,102 +77,83 @@ class Api
         //dump($this);
     }
 
-    /*public function testConnection()
-    {
-        $fields = [
-            'p24_merchant_id' => $this->options['p24_merchant_id'],
-            'p24_pos_id' => $this->options['p24_pos_id'],
-            'p24_sign' => md5(
-                $this->options['p24_pos_id'].'|'.$this->options['CRC']
-            ),
-        ];
+    /* public function testConnection()
+      {
+      $fields = [
+      'p24_merchant_id' => $this->options['p24_merchant_id'],
+      'p24_pos_id' => $this->options['p24_pos_id'],
+      'p24_sign' => md5(
+      $this->options['p24_pos_id'].'|'.$this->options['CRC']
+      ),
+      ];
 
-        $response = $this->doRequest('testConnection', $fields);
+      $response = $this->doRequest('testConnection', $fields);
 
-        dump($fields);
-        $res = $response->getBody()->getContents();
-        dump(explode('&', $res));
+      dump($fields);
+      $res = $response->getBody()->getContents();
+      dump(explode('&', $res));
 
-        exit;
-    }*/
+      exit;
+      } */
 
     /**
      * @return bool
      */
-    public function isRedirect(): bool
-    {
+    public function isRedirect(): bool {
         return (bool) $this->options['redirect'];
     }
 
     /**
      * Prepare a transaction request
      */
-    public function trnRegister(ArrayAccess $details): string
-    {
+    public function trnRegister(ArrayAccess $details): string {
         $details->validateNotEmpty([
             'p24_session_id', 'p24_amount', 'p24_currency', 'p24_email', 'p24_description', 'notify_url', 'done_url'
         ]);
-
-        //dump((array)$details);
+//dump($details);
         $fields = [
-            'p24_api_version' => self::VERSION,
-            'p24_sign' => $this->generateCrcSum($details, static::METHOD_REGISTER),
-            'p24_merchant_id' => $this->options['p24_merchant_id'],
-            'p24_pos_id' => $this->options['p24_pos_id'],
-            'p24_session_id' => $details['p24_session_id'],
-            'p24_amount' => $details['p24_amount'],
-            'p24_currency' => $details['p24_currency'],
-            'p24_description' => $details['p24_description'] ?? '',
-            'p24_email' => $details['p24_email'],
-
-            'p24_url_status' => $details['notify_url'],
-            'p24_url_return' => $details['done_url'],
-            'p24_url_cancel' => $details['cancel_url'] ?? $details['done_url'],
-
-            //'p24_method' => 25,
-            //'p24_channel' => 16,
+            'sign' => $this->generateCrcSum($details, static::METHOD_REGISTER),
+            'merchantId' => $this->options['p24_merchant_id'],
+            'posId' => $this->options['p24_pos_id'],
+            'sessionId' => $details['p24_session_id'],
+            'amount' => $details['p24_amount'],
+            'currency' => $details['p24_currency'],
+            'description' => $details['p24_description'] ?? '',
+            'email' => $details['p24_email'],
+            'urlStatus' => $details['notify_url'],
+            'urlReturn' => $details['done_url'],
+            'country' => 'PL',
+            'language' => 'pl',
+            'encoding' => 'UTF-8',
+            'channel' => 16,
         ];
-        //dump($fields);
         /** @var Response $response */
         $response = $this->doRequest(static::METHOD_REGISTER, $fields);
-
         return $response['data']['token'];
     }
 
-    public function trnRequest(string $token)
-    {
-        header("Location:" . $this->getApiEndpoint()."trnRequest/".$token);
+    public function trnRequest(string $token) {
+        header("Location:" . $this->getApiEndpoint() . "trnRequest/" . $token);
         exit;
-
-        /*if ($redirect) {
-            header("Location:" . $this->getApiEndpoint()."trnRequest/".$token);
-            return "";
-        } else {
-            return $this->hostLive."trnRequest/".$token;
-        }*/
     }
 
-    public function trnVerify(ArrayAccess $details)
-    {
+    public function trnVerify(ArrayAccess $details) {
         $details->validateNotEmpty([
-            'p24_session_id', 'p24_amount', 'p24_currency', 'p24_order_id'
+            'sessionId', 'amount', 'currency', 'orderId'
         ]);
 
-        //dump((array)$details);
         $fields = [
-            'p24_merchant_id' => $this->options['p24_merchant_id'],
-            'p24_pos_id' => $this->options['p24_pos_id'],
-            'p24_session_id' => $details['p24_session_id'],
-            'p24_amount' => $details['p24_amount'],
-            'p24_currency' => $details['p24_currency'],
-            'p24_order_id' => $details['p24_order_id'],
-            'p24_sign' => $this->generateCrcSum($details, static::METHOD_VERIFY),
+            'sign' => $this->generateCrcSum($details, static::METHOD_VERIFY),
+            'merchantId' => $details['merchantId'],
+            'posId' => $details['posId'],
+            'sessionId' => $details['sessionId'],
+            'amount' => $details['amount'],
+            'currency' => $details['currency'],
+            'orderId' => $details['orderId'],
         ];
 
-        //dump($fields);
         /** @var Response $response */
         $response = $this->doRequest(static::METHOD_VERIFY, $fields);
-        //dump($response);
         return $response['data'];
     }
 
@@ -184,31 +162,34 @@ class Api
      *
      * @return string
      */
-    protected function generateCrcSum(ArrayAccess $details, string $type): string
-    {
+    protected function generateCrcSum(ArrayAccess $details, string $type): string {
+        $crc = $this->options['CRC'];
+        $what = [
+            "sessionId" => $details['p24_session_id'],
+            "merchantId" => $this->options['p24_merchant_id'],
+            "amount" => $details['p24_amount'],
+            "currency" => $details['p24_currency'],
+            "crc" => $crc
+        ];
+        $whatVerify = [
+            "sessionId" => $details['sessionId'],
+            "orderId" => $details['orderId'],
+            "amount" => $details['amount'],
+            "currency" => $details['currency'],
+            "crc" => $crc
+        ];
         switch ($type) {
             case static::METHOD_REGISTER:
-                $controlSum = md5(
-                    $details['p24_session_id'] . "|"
-                    . $this->options['p24_merchant_id'] . "|"
-                    . $details['p24_amount'] . "|"
-                    . $details['p24_currency'] . "|"
-                    . $this->options['CRC']
-                );
+                $controlSum = hash('sha384', json_encode($what, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                 break;
             case static::METHOD_VERIFY:
-                $controlSum = md5(
-                    $details['p24_session_id'] . "|"
-                    . $details['p24_order_id'] . "|"
-                    . $details['p24_amount'] . "|"
-                    . $details['p24_currency'] . "|"
-                    . $this->options['CRC']
-                );
+                $controlSum = hash('sha384', json_encode($whatVerify, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
                 break;
             case static::METHOD_TEST:
                 $controlSum = md5(
-                    $this->options['p24_pos_id'] . "|"
-                    . $this->options['CRC']
+                        $this->options['p24_pos_id'] . "|"
+                        . $this->options['CRC']
                 );
                 break;
             default:
@@ -225,36 +206,49 @@ class Api
      *
      * @return array
      */
-    protected function doRequest($function, array $fields)
-    {
+    protected function doRequest($function, array $fields) {
         $method = 'POST';
+        $user = $this->options['p24_merchant_id'];
+        $pass = $this->options['secret'];
         $headers = [
-            'Content-Type' => 'application/x-www-form-urlencoded'
+            'Content-Type' => 'application/json',
         ];
-//dump($fields);
-        $request = $this->messageFactory->createRequest(
-            $method,
-            $this->getApiEndpoint().$function,
-            $headers,
-            http_build_query($fields)
-        );
+        $fields = Unirest\Request\Body::json($fields);
 
-        $response = $this->client->send($request);
+        Unirest\Request::auth($user, $pass);
 
-        if (false == ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300)) {
-            throw HttpException::factory($request, $response);
+        if ($function == "trnRegister") {
+            $function = "api/v1/transaction/register";
+            $response = Unirest\Request::post($this->getApiEndpoint() . $function, $headers, $fields);
+        } else if ($function == "trnVerify") {
+            $function = "api/v1/transaction/verify";
+            $response = Unirest\Request::put($this->getApiEndpoint() . $function, $headers, $fields);
+        } else {
+            $response = Unirest\Request::post($this->getApiEndpoint() . $function, $headers, $fields);
         }
 
-        $content = $response->getBody()->getContents();
+        if (false == ($response->code >= 200 && $response->code < 300)) {
+          
+            throw new \Exception("$response->code, $response->raw_body");
 
-        if (empty($content) || 0 !== stripos($content, 'error=0')) {
-            throw GatewayException::factory($content);
         }
 
-        $content = explode('&', $content);
-        $status = (int) explode('=', $content[0])[1];
+        $content = $response->body;
 
-        $data = !empty($content[1]) ? ['token' => explode('=', $content[1])[1]] : null;
+        if (empty($content) || 0 !== $content->responseCode) {
+            throw new \Exception($content);
+
+        }
+
+        $status = (int) $content->responseCode;
+        if ($function == "trnRegister") {
+            $data = !empty($content) ? ['token' => $content->data->token] : null;
+        } else if ($function == "trnVerify") {
+            $data = !empty($content) ? ['status' => $content->data->status] : null;
+        } else {
+            $data = !empty($content) ? (array)$content->data : null;
+        }
+
         $response = [
             'status' => $status,
             'data' => $data
@@ -266,10 +260,10 @@ class Api
     /**
      * @return string
      */
-    protected function getApiEndpoint(): string
-    {
+    protected function getApiEndpoint(): string {
         return !$this->options['sandbox'] ?
-            self::DEFAULT_URL :
-            self::SANDBOX_URL;
+                self::DEFAULT_URL :
+                self::SANDBOX_URL;
     }
+
 }

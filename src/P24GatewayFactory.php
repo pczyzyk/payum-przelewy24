@@ -36,8 +36,8 @@ class P24GatewayFactory extends GatewayFactory
 
         if (false == $config['payum.api']) {
             $config['payum.default_options'] = array(
-                'p24_merchant_id' => '',
-                'p24_pos_id' => '',
+                'merchantId' => '',
+                'posId' => '',
                 'CRC' => '',
                 'redirect' => true,
                 'sandbox' => true,
@@ -45,18 +45,18 @@ class P24GatewayFactory extends GatewayFactory
 
             $config->defaults($config['payum.default_options']);
             $config['payum.required_options'] = [
-                'p24_merchant_id', 'p24_pos_id', 'CRC'
+                'merchantId', 'posId', 'CRC'
             ];
 
             $config['payum.api'] = function (ArrayObject $config) {
                 $config->validateNotEmpty($config['payum.required_options']);
-
                 $p24Config = [
-                    'p24_merchant_id' => $config['p24_merchant_id'],
-                    'p24_pos_id' => $config['p24_pos_id'],
+                    'p24_merchant_id' => $config['merchantId'],
+                    'p24_pos_id' => $config['posId'],
                     'CRC' => $config['CRC'],
                     'redirect' => $config['redirect'],
                     'sandbox' => $config['sandbox'],
+                    'secret' => $config['secret'],
                 ];
 
                 return new Api(
